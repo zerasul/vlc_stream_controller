@@ -1,36 +1,49 @@
 from fastapi import FastAPI,Response,Request
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from player import Player
+
+origins = [
+    'http://localhost:3000'
+]
 
 player = Player()
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 class Song(BaseModel):
-    path:str
+    name:str
 
 @app.get("/api/songs")
-def get_random_gif(request=Request):
-    return player.songs
+async def getSongs(request=Request):
+    return player.get_songs()
 
 @app.post("/api/songs")
-def get_gif(song:Song):
+async def addSong(song:Song):
     player.addSong(song.path)
     return {"song": song.path}
 
 @app.get("/api/play/{index}")
-def play(index:int):
+async def play(index:int):
     return player.play(index)
 
 @app.get("/api/stop")
-def stop():
+async def stop():
     return player.stop()
 
 @app.get("/api/next")
-def next():
+async def next():
     return player.next()
 
 @app.get("/api/prev")
-def prev():
+async def prev():
     return player.prev()
 
 
